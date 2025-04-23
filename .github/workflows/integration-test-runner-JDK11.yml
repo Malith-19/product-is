@@ -9,8 +9,8 @@ on:
         required: true
       jdk:
         description: "Enter Java version (ex: 8,11)"
-        default:
-        required: true
+        default: 11
+        required: false
 
 env:
   MAVEN_OPTS: -Dhttp.keepAlive=false -Dmaven.wagon.http.pool=false -Dmaven.wagon.http.retryHandler.class=standard -Dmaven.wagon.http.retryHandler.count=3 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -XX:+HeapDumpOnOutOfMemoryError
@@ -75,8 +75,7 @@ jobs:
           JAVA_8_HOME: ${{env.J8HOME}}
           JAVA_11_HOME: ${{env.J11HOME}}
         run: |
-          wget https://raw.githubusercontent.com/wso2/product-is/master/.github/scripts/pr-builder.sh
-          bash pr-builder.sh
+          bash .github/scripts/pr-builder.sh
       - name: Archive PR diff file
         if: always()
         uses: actions/upload-artifact@v4
