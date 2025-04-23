@@ -29,7 +29,6 @@ echo "Cloning product-is"
 echo "=========================================================="
 
 git clone https://github.com/malith-19/product-is
-git checkout update-integration-tests-for-admin-force-password-reset
 
 if [ "$REPO" = "product-is" ]; then
 
@@ -338,6 +337,7 @@ else
   fi
 
   cd product-is
+  git checkout update-integration-tests-for-admin-force-password-reset
 
   echo "Updating dependency version in product-is..."
   echo "=========================================================="
