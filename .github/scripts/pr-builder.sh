@@ -55,10 +55,12 @@ PR_LINK=${PR_LINK%/}
 JDK_VERSION=${JDK_VERSION%/}
 JAVA_8_HOME=${JAVA_8_HOME%/}
 JAVA_11_HOME=${JAVA_11_HOME%/}
+INTEGRATION_TESTS_PR=${INTEGRATION_TESTS_PR%/}
 echo "    PR_LINK: $PR_LINK"
 echo "    JAVA 8 Home: $JAVA_8_HOME"
 echo "    JAVA 11 Home: $JAVA_11_HOME"
 echo "    User Input: $JDK_VERSION"
+echo "    Integration test PR LINk: $INTEGRATION_TESTS_PR"
 echo "::warning::Build ran for PR $PR_LINK"
 
 USER=$(echo $PR_LINK | awk -F'/' '{print $4}')
@@ -74,6 +76,20 @@ echo "Cloning product-is"
 echo "=========================================================="
 
 git clone https://github.com/wso2/product-is product-is-$BUILDER_NUMBER
+
+if [ -n "$INTEGRATION_TESTS_PR" ]; then
+  echo "Applying the integration test changes to the product-is repository..."
+  echo "Using INTEGRATION_TEST_PR: $INTEGRATION_TESTS_PR"
+  cd product-is-$BUILDER_NUMBER
+  wget -q --output-document=diff.diff $INTEGRATION_TESTS_PR.diff
+  cat diff.diff
+  git apply diff.diff || {
+    echo 'Applying diff failed. Exiting...'
+    echo "::error::Applying diff failed."
+    exit 1
+  }
+  cd ..
+fi
 
 disable_tests "$ENABLED_TESTS"
 
