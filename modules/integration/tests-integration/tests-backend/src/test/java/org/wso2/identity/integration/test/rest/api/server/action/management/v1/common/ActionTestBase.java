@@ -59,7 +59,6 @@ public class ActionTestBase extends RESTAPIServerTestBase {
     protected static final String TEST_ACTION_UPDATED_NAME = "Action name Updated";
     protected static final String TEST_ACTION_UPDATED_DESCRIPTION = "This is the updated configuration of action.";
     protected static final String TEST_UPDATED_ENDPOINT_URI = "https://abc.com/tokenUpdated";
-    protected static final String TEST_PROPERTIES_AUTH_ATTRIBUTE = "properties";
     protected static final String TEST_ACCESS_TOKEN_AUTH_PROPERTY = "accessToken";
     protected static final String TEST_ACCESS_TOKEN_AUTH_PROPERTY_VALUE = "24f64d17-9824-4e28-8413-de45728d8e84";
     protected static final String TEST_UPDATED_ACCESS_TOKEN_AUTH_PROPERTY_VALUE = "88f63a16-9824-4e28-e463-de11118d8e84";
