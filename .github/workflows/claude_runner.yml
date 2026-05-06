@@ -37,8 +37,45 @@ jobs:
           ISSUE_NUMBER=$(echo "$ISSUE_JSON" | jq -r .number)
           echo "oldest_issue_number=$ISSUE_NUMBER" >> $GITHUB_OUTPUT
 
-      - name: Update labels and trigger Claude
+      - name: Verify label was added by authorized user
+        id: verify_label_adder
         if: steps.get_oldest_queued.outputs.oldest_issue_number != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.DOC_FIXING_AGENT_GITHUB_TOKEN }}
+        run: |
+          ISSUE_NUMBER=${{ steps.get_oldest_queued.outputs.oldest_issue_number }}
+
+          echo "Verifying who added AI-Agent/Queued label for issue #$ISSUE_NUMBER..."
+
+          # Find who last added the AI-Agent/Queued label via the issue timeline
+          LABEL_ADDER=$(gh api "repos/${{ github.repository }}/issues/$ISSUE_NUMBER/timeline?per_page=100" \
+            | jq -r '[.[] | select(.event == "labeled" and .label.name == "AI-Agent/Queued")] | last | .actor.login')
+
+          echo "Label was added by: $LABEL_ADDER"
+
+          if [ -z "$LABEL_ADDER" ] || [ "$LABEL_ADDER" == "null" ]; then
+            echo "Could not determine who added AI-Agent/Queued label. Skipping issue #$ISSUE_NUMBER."
+            echo "authorized=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Check the collaborator permission level for the user who added the label
+          PERMISSION=$(gh api "repos/${{ github.repository }}/collaborators/$LABEL_ADDER/permission" \
+            --jq '.permission' 2>/dev/null || echo "none")
+
+          echo "Permission level for $LABEL_ADDER: $PERMISSION"
+
+          if [[ "$PERMISSION" == "write" || "$PERMISSION" == "admin" || "$PERMISSION" == "maintain" ]]; then
+            echo "User $LABEL_ADDER is authorized (permission: $PERMISSION). Proceeding."
+            echo "authorized=true" >> $GITHUB_OUTPUT
+          else
+            echo "Label was added by $LABEL_ADDER who does not have write access (permission: $PERMISSION). Removing label."
+            gh issue edit $ISSUE_NUMBER --repo ${{ github.repository }} --remove-label "AI-Agent/Queued"
+            echo "authorized=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update labels and trigger Claude
+        if: steps.get_oldest_queued.outputs.oldest_issue_number != '' && steps.verify_label_adder.outputs.authorized == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.DOC_FIXING_AGENT_GITHUB_TOKEN }}
         run: |
