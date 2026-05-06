@@ -27,7 +27,6 @@ env:
   WSO2_AGENT_IDENTITY_DB: "WSO2AGENTIDENTITY_DB"
   MSSQL_JDBC_VERSION: "12.8.1.jre11"
   MYSQL_JDBC_VERSION: "8.0.33"
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   run-test-runners:
@@ -59,10 +58,10 @@ jobs:
             -H 'Authorization: token ${{secrets.PR_BUILDER_COMMENT}}' \
             -d '{"body":"${{ github.event.inputs.database_type }} PR builder started \nLink: https://github.com/wso2/product-is/actions/runs/${{github.run_id}}"}'
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: "21"
           distribution: "temurin"
@@ -77,7 +76,7 @@ jobs:
           echo "CURRENT_MONTH=$(date +%Y-%m)" >> ${GITHUB_ENV}
 
       - name: Cache maven packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.m2
@@ -463,7 +462,7 @@ jobs:
 
       - name: Archive mvn build log
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ github.event.inputs.database_type }}-mvn-build-log-${{ matrix.runner_id }}
           path: |
@@ -473,7 +472,7 @@ jobs:
 
       - name: Archive surefire reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ github.event.inputs.database_type }}-surefire-report-${{ matrix.runner_id }}
           path: |
@@ -482,7 +481,7 @@ jobs:
 
       - name: Archive heap dump
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ github.event.inputs.database_type }}-heap-dump-${{ matrix.runner_id }}
           path: |

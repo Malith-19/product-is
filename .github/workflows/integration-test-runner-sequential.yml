@@ -9,7 +9,6 @@ on:
 
 env:
   MAVEN_OPTS: -Dhttp.keepAlive=false -Dmaven.wagon.http.pool=false -Dmaven.wagon.http.retryHandler.class=standard -Dmaven.wagon.http.retryHandler.count=3 -Djdk.util.zip.disableZip64ExtraFieldValidation=true -XX:+HeapDumpOnOutOfMemoryError
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   run-all-tests:
@@ -17,9 +16,9 @@ jobs:
     steps:
       - name: Print Input
         run: echo "Running all tests sequentially for PR - ${{ github.event.inputs.pr }}"
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: "21"
           distribution: "temurin"
@@ -32,7 +31,7 @@ jobs:
           echo "CURRENT_MONTH=$(date +%Y-%m)" >> ${GITHUB_ENV}
       - name: Cache maven packages
         id: cache-maven-m2
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.m2
@@ -40,7 +39,7 @@ jobs:
           key: ${{ runner.os }}-pr-builder-sequential-${{ env.CURRENT_MONTH }}
       - name: Setup pnpm
         id: setup-pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
         with:
           version: latest
           run_install: false
@@ -52,7 +51,7 @@ jobs:
         run: |
           bash .github/scripts/pr-builder.sh 1 ""
       - name: Archive PR diff file
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: repo-pr-diff
           path: |
@@ -60,7 +59,7 @@ jobs:
           if-no-files-found: warn
       - name: Archive repo mvn build log
         if: ${{ steps.builder_step.outputs.REPO_NAME != 'product-is' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: repo-mvn-build-log
           path: |
@@ -68,7 +67,7 @@ jobs:
           if-no-files-found: warn
       - name: Archive product-is mvn build log
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: product-is-mvn-build-log
           path: |
@@ -76,7 +75,7 @@ jobs:
           if-no-files-found: warn
       - name: Archive product-is surefire reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: product-is-surefire-report
           path: |
@@ -84,7 +83,7 @@ jobs:
           if-no-files-found: warn
       - name: Archive heap dump
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: heap-dump
           path: |
